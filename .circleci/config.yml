@@ -1,13 +1,41 @@
 version: 2.1
 
+orbs: 
+  slack: circleci/slack@4.12.1
+
 defaults: &nodeImage
   docker:
       - image: circleci/node:13.8.0
+
+slack_notify:
+    description: "Send a message in Slack"
+    steps:
+      - slack/notify:
+          channel: general
+          event: fail
+          template: basic_fail_1
 
 jobs:
   build-frontend:
     <<: *nodeImage
     steps:
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "*Started running workflow*",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: always
       - checkout
       - restore_cache:
           keys: [frontend-build]
