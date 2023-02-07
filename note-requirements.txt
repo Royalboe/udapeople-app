@@ -6,7 +6,6 @@ URLS
 5.) Evidence of Prometheus Server
 
 SCREENSHOTS
-1.) Build Jobs that failed because of compile errors
 2.) Build Jobs that failed because of test errors
 3.) Failure because of vulnerable packages
 4.) An alert from one of your failed builds
