@@ -6,7 +6,6 @@ URLS
 5.) Evidence of Prometheus Server
 
 SCREENSHOTS
-2.) Build Jobs that failed because of test errors
 3.) Failure because of vulnerable packages
 4.) An alert from one of your failed builds
 5.) Console output of appropriate failure for infrastructure creation job (using CloudFormation)
