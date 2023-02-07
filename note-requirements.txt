@@ -1,0 +1,20 @@
+URLS
+1.) GitHub repo link
+2.) Evidence of successful deployment of the static website to S3
+3.) Evidence of successful deployment of the static website to CloudFront
+4.) Evidence of deployed back-end application
+5.) Evidence of Prometheus Server
+
+SCREENSHOTS
+1.) Build Jobs that failed because of compile errors
+2.) Build Jobs that failed because of test errors
+3.) Failure because of vulnerable packages
+4.) An alert from one of your failed builds
+5.) Console output of appropriate failure for infrastructure creation job (using CloudFormation)
+6.) Console output of a smoke test job that is failing appropriately.
+7.) Console output of a successful rollback after a failed smoke test.
+8.) Console output of successful promotion of new version to production in CloudFront
+9.) Console output of successful promotion of new version to production in CloudFront
+10.) Evidence that deploy jobs only happen on master branch.
+11.) Evidence that Prometheus is monitoring memory, cpu and disk usage of EC2 instances.
+12.) Evidence that Prometheus and AlertManager send alerts when certain conditions exist in the EC2 instance.
