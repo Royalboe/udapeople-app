@@ -267,14 +267,10 @@ jobs:
       - run:
           name: Install dependencies (ansible)
           command: apk add --update ansible
-      
       - run:
-          name: Install dependencies
+          name: Install dependencies (openssh)
           command: |
-            sudo apt update -y
-            sudo apt install -y gzip tar
-            apk add --update openssh
-            apk add --update ansible
+            apk add --update openssh # Install openssh
       - run:
           name: Configure server
           command: |
