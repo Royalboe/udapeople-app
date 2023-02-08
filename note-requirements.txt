@@ -16,6 +16,3 @@ SCREENSHOTS
 10.) Evidence that deploy jobs only happen on master branch.
 11.) Evidence that Prometheus is monitoring memory, cpu and disk usage of EC2 instances.
 12.) Evidence that Prometheus and AlertManager send alerts when certain conditions exist in the EC2 instance.
-
-
-xoxb-3413784616099-4777861089089-8iyxQYPaNihurItsmoJZVlmB
