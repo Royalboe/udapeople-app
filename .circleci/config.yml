@@ -264,7 +264,6 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure.yml
-      - notify_slack_failure
       - notify_slack_success
       - notify_slack_error
       - destroy-environment:
