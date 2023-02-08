@@ -12,7 +12,7 @@ defaults:
         - image: amazon/aws-cli
   - &ansibleImage
     docker:
-        - image: circleci/ansible
+        - image: ansible/ansible
 
 commands:
   
