@@ -10,8 +10,23 @@ defaults:
   - &awsImage
     docker:
         - image: amazon/aws-cli
+  - &ansibleImage
+    docker:
+        - image: circleci/ansible
 
 commands:
+  
+  install-aws:
+    description: Install AWS CLI v2
+    steps:
+      - run:
+          name: Install AWS CLI v2
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+
+
   trigger_slack_notification:
     steps:
       - slack/notify:
@@ -226,6 +241,36 @@ jobs:
       - notify_slack_success
       - notify_slack_error     
 
+  configure-infrastructure:
+    <<: *ansibleImage
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["40:c5:0a:6b:9a:07:a6:d6:9c:93:24:dd:29:ff:4f:65"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: check inventory content
+          command: cat ~/project/.circleci/ansible/inventory.txt
+      - install-aws-cli
+      
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt update -y
+            sudo apt install -y gzip tar
+            apk add --update openssh
+      - run:
+          name: Configure server
+          command: |
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure.yml
+      - notify_slack_failure
+      - notify_slack_success
+      - notify_slack_error
+      - destroy-environment:
+          stack-name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          stack-name: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
 workflows:
   default:
     jobs:
