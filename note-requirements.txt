@@ -6,8 +6,6 @@ URLS
 5.) Evidence of Prometheus Server
 
 SCREENSHOTS
-3.) Failure because of vulnerable packages
-4.) An alert from one of your failed builds
 5.) Console output of appropriate failure for infrastructure creation job (using CloudFormation)
 6.) Console output of a smoke test job that is failing appropriately.
 7.) Console output of a successful rollback after a failed smoke test.
