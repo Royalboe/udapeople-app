@@ -205,7 +205,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install tar and gzip
+          name: Install tar and gzip 
           command: |
             yum update -y
             yum install -y gzip tar
