@@ -275,12 +275,13 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
-      - notify_slack_success
-      - notify_slack_error
       - destroy-environment:
           stack-name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
           stack-name: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+      
+      - notify_slack_success
+      - notify_slack_error
 workflows:
   default:
     jobs:
