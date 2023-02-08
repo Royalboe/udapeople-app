@@ -267,6 +267,7 @@ jobs:
       - run:
           name: Install dependencies (ansible)
           command: apk add --update ansible
+
       - run:
           name: Install dependencies (openssh)
           command: |
@@ -280,8 +281,6 @@ jobs:
       - destroy-environment:
           stack-name: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
       
-      - notify_slack_success
-      - notify_slack_error
 workflows:
   default:
     jobs:
