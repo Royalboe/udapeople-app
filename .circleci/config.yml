@@ -38,6 +38,15 @@ commands:
             # sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible -y
 
+  install-nodejs:
+    description: Install Node.js 13
+    steps:
+      - run:
+          name: Install Node.js 13
+          command: |
+            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+            sudo apt install -y nodejs
+
   trigger_slack_notification:
     steps:
       - slack/notify:
@@ -76,7 +85,7 @@ commands:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
       stack-name:
-        default: "frontend-${CIRCLE_WORKFLOW_ID:0:5}"
+        default: "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
         type: string   
     steps:
       - run:
@@ -85,11 +94,44 @@ commands:
           command: |
             aws cloudformation delete-stack --stack-name << parameters.stack-name >>
 
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow.
+    parameters:
+      workflow-id:
+        type: string
+        default: ${CIRCLE_workflow-id:0:7}      
+    steps:
+      - run:
+          name: Revert migrations
+          when: on_fail
+          command: |
+            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
+            SUCCESS=$(curl https://keyvalue.immanuel.co/api/KeyVal/GetValue/$(cat ~/appkey.txt)/migration_<<parameters.workflow-id>>)
+            if(( $SUCCESS==1 )); 
+            then
+              cd ~/project/backend
+              npm install
+              npm run migrations:revert
+            fi
+  
+  clear-bucket:
+    description: Clear s3 bucket.
+    parameters:
+      bucket-name:
+        default: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
+        type: string
+    steps:
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: |
+            aws s3 rm "s3://<< parameters.bucket-name>>" --recursive
+
 jobs:
   build-frontend:
     <<: *nodeImage
     steps:
-      - trigger_slack_notification
+      # - trigger_slack_notification
       - checkout
       - restore_cache:
           keys: [frontend-build]
@@ -102,13 +144,13 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-      - notify_slack_success
-      - notify_slack_error
+      # - notify_slack_success
+      # - notify_slack_error
 
   build-backend:
     <<: *nodeImage
     steps:
-      - trigger_slack_notification
+      # - trigger_slack_notification
       - checkout
       - restore_cache:
           keys: [backend-build]
@@ -127,7 +169,7 @@ jobs:
   test-frontend:
     <<: *nodeImage
     steps:
-      - trigger_slack_notification
+      # - trigger_slack_notification
       - checkout
       - restore_cache:
           keys: [frontend-test]
@@ -140,13 +182,13 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-test
-      - notify_slack_success
-      - notify_slack_error
+      # - notify_slack_success
+      # - notify_slack_error
   
   test-backend:
     <<: *nodeImage
     steps:
-      - trigger_slack_notification
+      # - trigger_slack_notification
       - checkout
       - restore_cache:
           keys: [backend-test]
@@ -159,13 +201,13 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-test
-      - notify_slack_success
-      - notify_slack_error
+      # - notify_slack_success
+      # - notify_slack_error
 
   scan-frontend:
     <<: *nodeImage
     steps:
-      - trigger_slack_notification
+      # - trigger_slack_notification
       - checkout
       - restore_cache:
           keys: [frontend-scan]
@@ -178,13 +220,13 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-scan
-      - notify_slack_success
-      - notify_slack_error
+      # - notify_slack_success
+      # - notify_slack_error
     
   scan-backend:
     <<: *nodeImage
     steps:
-      - trigger_slack_notification
+      # - trigger_slack_notification
       - checkout
       - restore_cache:
           keys: [backend-scan]
@@ -197,8 +239,8 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-scan
-      - notify_slack_success
-      - notify_slack_error
+      # - notify_slack_success
+      # - notify_slack_error
   
   deploy-infrastructure:
     <<: *awsImage
@@ -231,7 +273,7 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             aws ec2 describe-instances \
-              --filter Name="tag:Name",Values="backend-${CIRCLE_WORKFLOW_ID:0:5}" \
+              --filter Name="tag:Name",Values="backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text >> .circleci/ansible/inventory.txt
       
@@ -243,14 +285,25 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
+      
+      - run:
+          name: Get memstash key
+          command: |
+            curl https://keyvalue.immanuel.co/api/KeyVal/GetAppKey > ~/appkey.txt
+      - run: cat ~/appkey.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - appkey.txt
+
       - destroy-environment:
           stack-name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
 
       - destroy-environment:
           stack-name: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
 
-      - notify_slack_success
-      - notify_slack_error     
+      # - notify_slack_success
+      # - notify_slack_error     
 
   configure-infrastructure:
     <<: *ansibleImage
@@ -281,6 +334,109 @@ jobs:
       - destroy-environment:
           stack-name: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
       
+  
+  run-migrations:
+    <<: *nodeImage
+    steps:
+      - checkout
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm install
+            # Run and save migrations results
+            npm run migrations > migration_dump.txt
+      - run:
+          name: Send migration results to memstash
+          command: |
+            if grep -q "has been executed successfully." ~/project/backend/dump.txt   
+            then
+              curl -X POST https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/$(cat ~/appkey.txt)/migration_${CIRCLE_WORKFLOW_ID:0:5}/1
+              fi
+      - destroy-environment:
+          stack-name: "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations   
+      # - notify_slack_success
+      # - notify_slack_error   
+    
+
+  deploy-frontend:
+    <<: *nodeImage
+    steps:
+      - checkout
+      - install-aws
+      - restore_cache:
+          keys: [frontend-build]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            cd frontend
+            npm install
+            
+      - run:
+          name: Get backend url
+          command: |
+            # your code here
+            export BACKEND_IP=$(tail -n 1 ~/project/.circleci/ansible/inventory.txt)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL=${API_URL}" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - clear-bucket:
+          bucket-name: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          stack-name: "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations  
+  
+  deploy-backend:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt update -y
+            sudo apt install tar gzip -y
+      - install-aws
+      - install-nodejs
+      - install-ansible
+      - add_ssh_keys:
+          fingerprints: ["40:c5:0a:6b:9a:07:a6:d6:9c:93:24:dd:29:ff:4f:65"]
+      - attach_workspace:
+          at: ~/
+
+      - run:
+          name: Copy backend to ansible files folder
+          command: |
+            mkdir ./.circleci/ansible/roles/deploy/files/
+            cp -r ./backend ./.circleci/ansible/roles/deploy/files
+      - run:
+          name: Deploy backend
+          command: |
+            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'
+
+      - clear-bucket
+      - destroy-environment:
+          stack-name: "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations
+
+
 workflows:
   default:
     jobs:
