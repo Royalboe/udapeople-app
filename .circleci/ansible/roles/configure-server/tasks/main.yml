@@ -20,7 +20,7 @@
 
 - name: "Move .env variables to profile"
   become: true
-  ansible.builtin.copy:
-    src: .myenv.sh
+  template:
+    src: myenv.sh
     dest: /etc/profile.d
-    mode: 0644
+    mode: 0666
