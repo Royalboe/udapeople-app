@@ -344,7 +344,6 @@ jobs:
           command: |
             cd backend
             npm cache clean --force
-            rm -r .node_modules
             rm package-lock.json
             npm install
             # Run and save migrations results
