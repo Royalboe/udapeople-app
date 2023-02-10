@@ -319,10 +319,6 @@ jobs:
           command: cat ~/project/.circleci/ansible/inventory.txt
       
       - install-ansible
-      
-      # - run:
-      #     name: Install dependencies (ansible)
-      #     command: apk add --update ansible
 
       - run:
           name: Install dependencies (openssh)
@@ -355,6 +351,7 @@ jobs:
           command: |
             cd backend
             npm install
+            npm run build
             # Run and save migrations results
             npm run migrations > migration_dump.txt
       - run:
