@@ -318,6 +318,8 @@ jobs:
           name: check inventory content
           command: cat ~/project/.circleci/ansible/inventory.txt
       
+      - install-ansible
+      
       # - run:
       #     name: Install dependencies (ansible)
       #     command: apk add --update ansible
