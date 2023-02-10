@@ -336,7 +336,8 @@ jobs:
       
   
   run-migrations:
-    <<: *nodeImage
+    docker:
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - install-aws
@@ -351,7 +352,6 @@ jobs:
           command: |
             cd backend
             npm install
-            npm run build
             # Run and save migrations results
             npm run migrations > migration_dump.txt
       - run:
