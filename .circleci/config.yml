@@ -346,9 +346,9 @@ jobs:
       - install-aws
       # - attach_workspace:
       #     at: ~/
-      # - restore_cache:
-      #     keys:
-      #       - "backend-build"
+      - restore_cache:
+          keys:
+            - "backend-build"
 
       - run:
           name: Run migrations
