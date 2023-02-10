@@ -340,8 +340,8 @@ jobs:
     steps:
       - checkout
       - install-aws
-      # - attach_workspace:
-      #     at: ~/
+      - attach_workspace:
+          at: ~/
       - restore_cache:
           keys:
             - "backend-build"
