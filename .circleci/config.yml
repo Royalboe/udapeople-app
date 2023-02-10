@@ -339,12 +339,17 @@ jobs:
     <<: *nodeImage
     steps:
       - checkout
+      - install-aws
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          keys:
+            - "backend-build"
+
       - run:
           name: Run migrations
           command: |
             cd backend
-            npm cache clean --force
-            rm package-lock.json
             npm install
             # Run and save migrations results
             npm run migrations > migration_dump.txt
