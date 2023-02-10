@@ -343,6 +343,9 @@ jobs:
           name: Run migrations
           command: |
             cd backend
+            npm cache clean –force
+            rm -r .node_modules
+            rm package-lock.json
             npm install
             # Run and save migrations results
             npm run migrations > migration_dump.txt
