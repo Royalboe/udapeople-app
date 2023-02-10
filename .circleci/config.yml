@@ -327,7 +327,7 @@ jobs:
       - run:
           name: Install dependencies (openssh)
           command: |
-            sudo install openssh
+            sudo apt-get install openssh-server
             # apk add --update openssh # Install openssh
       - run:
           name: Configure server
@@ -340,9 +340,7 @@ jobs:
       
   
   run-migrations:
-    docker:
-        - image: circleci/node:13.8.0
-    # <<: *nodeImage
+    <<: *nodeImage
     steps:
       - checkout
       - install-aws
