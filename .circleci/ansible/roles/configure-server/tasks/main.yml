@@ -17,3 +17,10 @@
     name: pm2
     production: yes
     global: yes
+
+- name: "Move .env variables to profile"
+  become: true
+  ansible.builtin.copy:
+    src: .myenv.sh
+    dest: /etc/profile.d
+    mode: 0644

@@ -35,7 +35,7 @@ commands:
           command: |
             sudo apt update
             sudo apt install software-properties-common -y
-            # sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible -y
 
   install-nodejs:
@@ -286,15 +286,15 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       
-      - run:
-          name: Get memstash key
-          command: |
-            curl https://keyvalue.immanuel.co/api/KeyVal/GetAppKey > ~/appkey.txt
-      - run: cat ~/appkey.txt
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - appkey.txt
+      # - run:
+      #     name: Get memstash key
+      #     command: |
+      #       curl -d "email=auomidejohnson@gmail.com" https://kvdb.io > ~/appkey.txt
+      # - run: cat ~/appkey.txt
+      # - persist_to_workspace:
+      #     root: ~/
+      #     paths:
+      #       - appkey.txt
 
       - destroy-environment:
           stack-name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
@@ -336,15 +336,17 @@ jobs:
       
   
   run-migrations:
-    <<: *nodeImage
+    docker:
+        - image: circleci/node:13.8.0
+    # <<: *nodeImage
     steps:
       - checkout
-      - install-aws
-      - attach_workspace:
-          at: ~/
-      - restore_cache:
-          keys:
-            - "backend-build"
+      # - install-aws
+      # - attach_workspace:
+      #     at: ~/
+      # - restore_cache:
+      #     keys:
+      #       - "backend-build"
 
       - run:
           name: Run migrations
@@ -358,7 +360,7 @@ jobs:
           command: |
             if grep -q "has been executed successfully." ~/project/backend/dump.txt   
             then
-              curl -X POST https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/$(cat ~/appkey.txt)/migration_${CIRCLE_WORKFLOW_ID:0:5}/1
+              curl --insecure https://kvdb.io/66VBqWjHm8PoAQTZzPH144/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
               fi
       - destroy-environment:
           stack-name: "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
