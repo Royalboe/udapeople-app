@@ -412,35 +412,43 @@ jobs:
       - revert-migrations  
   
   deploy-backend:
-    docker:
-      - image: cimg/base:stable
+    <<: *nodeImage
     steps:
       - checkout
+      - add_ssh_keys:
+          fingerprints: ["40:c5:0a:6b:9a:07:a6:d6:9c:93:24:dd:29:ff:4f:65"]
+      - attach_workspace:
+          at: ~/
+      - install-ansible
       - install-aws
       - run:
           name: Install dependencies
           command: |
             sudo apt update -y
             sudo apt install tar gzip -y
-      - install-aws
-      - install-nodejs
-      - install-ansible
-      - add_ssh_keys:
-          fingerprints: ["40:c5:0a:6b:9a:07:a6:d6:9c:93:24:dd:29:ff:4f:65"]
-      - attach_workspace:
-          at: ~/
-
-      - run:
-          name: Copy backend to ansible files folder
-          command: |
-            mkdir ./.circleci/ansible/roles/deploy/files/
-            cp -r ./backend ./.circleci/ansible/roles/deploy/files
+      # - run:
+      #     name: Copy backend to ansible files folder
+      #     command: |
+      #       mkdir ./.circleci/ansible/roles/deploy/files/
+      #       cp -r ./backend ./.circleci/ansible/roles/deploy/files
       - run:
           name: Deploy backend
           command: |
-            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'
+            cd backend
+            npm install
+            npm run build
+            cd ..
 
-      - clear-bucket
+            cd .circleci/ansible
+            mkdir files
+            cd files
+            tar -C ../../../backend -czvf artifact.tar.gz .
+            cd ../
+
+            echo "Content of the inventory file is :"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'
+# ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'
       - destroy-environment:
           stack-name: "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
@@ -590,4 +598,6 @@ workflows:
       - run-migrations:
           requires: [configure-infrastructure]
       - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
           requires: [run-migrations]
