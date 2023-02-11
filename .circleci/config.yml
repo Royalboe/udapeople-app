@@ -374,11 +374,13 @@ jobs:
     <<: *nodeImage
     steps:
       - checkout
-      - install-aws
-      - restore_cache:
-          keys: [frontend-build]
       - attach_workspace:
           at: ~/
+      - restore_cache:
+          keys: [frontend-build]
+      - install-aws
+      - install-ansible
+      
       - run:
           name: Install dependencies
           command: |
@@ -587,3 +589,5 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
+      - deploy-front-end:
+          requires: [run-migrations]
