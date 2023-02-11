@@ -6,8 +6,6 @@ URLS
 5.) Evidence of Prometheus Server
 
 SCREENSHOTS
-6.) Console output of a smoke test job that is failing appropriately.
-7.) Console output of a successful rollback after a failed smoke test.
 8.) Console output of successful promotion of new version to production in CloudFront
 9.) Console output of successful promotion of new version to production in CloudFront
 10.) Evidence that deploy jobs only happen on master branch.
