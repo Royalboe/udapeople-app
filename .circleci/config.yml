@@ -533,8 +533,7 @@ jobs:
           stack-name: "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
           stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:7}"
-      - revert-migrations    
-      - slack_notify     
+      - revert-migrations        
 
   cleanup:
       docker:
