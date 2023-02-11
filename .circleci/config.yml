@@ -450,7 +450,7 @@ jobs:
             # cd ../
 
             echo "Content of the inventory file is :"
-            cat inventory.txt
+            cat ~/project/.circleci/ansible/inventory.txt
             # ansible-playbook -i inventory.txt deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'
             ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'
       - clear-bucket:
