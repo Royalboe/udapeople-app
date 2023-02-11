@@ -1,12 +1,12 @@
-- name: Creates directory
-  file:
-    path: ~/backend
-    state: directory
+# - name: Creates directory
+#   file:
+#     path: ~/backend
+#     state: directory
 
-- name: "move backend files to server."
-  copy:
-    src: files/backend/
-    dest: ~/backend
+# - name: "move backend files to server."
+#   copy:
+#     src: files/backend/
+#     dest: ~/backend
 
 - name: "install package dependencies"
   shell: |
