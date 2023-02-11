@@ -422,6 +422,10 @@ jobs:
       - install-ansible
       - install-aws
       - run:
+          name: Install dependencies (openssh)
+          command: |
+            sudo apt-get install openssh-server
+      - run:
           name: Install dependencies
           command: |
             sudo apt update -y
