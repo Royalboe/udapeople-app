@@ -360,12 +360,12 @@ jobs:
             if grep -q "has been executed successfully." ~/project/backend/dump.txt   
             then
               curl --insecure https://kvdb.io/5j2Vyk9xyHqE3ZZVQMGA7M/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
-              fi
+            fi
+      - revert-migrations
       - destroy-environment:
           stack-name: "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
-          stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:7}"
-      - revert-migrations   
+          stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:7}"   
       # - notify_slack_success
       # - notify_slack_error   
     
@@ -403,13 +403,13 @@ jobs:
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - revert-migrations
       - clear-bucket:
           bucket-name: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
           stack-name: "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
-          stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:7}"
-      - revert-migrations  
+          stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:7}"  
   
   deploy-backend:
     <<: *nodeImage
@@ -453,13 +453,13 @@ jobs:
             cat ~/project/.circleci/ansible/inventory.txt
             # ansible-playbook -i inventory.txt deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'
             ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'
+      - revert-migrations
       - clear-bucket:
           bucket-name: "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
           stack-name: "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
           stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:7}"
-      - revert-migrations
 
   smoke-test:
     docker:
@@ -496,12 +496,12 @@ jobs:
             else
               exit 1
             fi
+      - revert-migrations
       - clear-bucket
       - destroy-environment:
           stack-name: "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
-          stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:7}"
-      - revert-migrations    
+          stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:7}"    
 
   cloudfront-update:
     <<: *nodeImage
