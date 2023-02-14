@@ -1,0 +1,6 @@
+URLS
+1.) GitHub Url : https://github.com/Royalboe/udapeople-app
+2.) S3 URL : http://udapeople-a4fc97a.s3-website-us-east-1.amazonaws.com
+3.) CloudFront : http://d361iryjv91dwz.cloudfront.net
+4.) Healthy Backend : http://3.235.99.181:3030/api/status
+5.) Prometheus: http://34.202.159.21:9090/targets
